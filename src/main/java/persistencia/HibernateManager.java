@@ -14,21 +14,24 @@ public class HibernateManager {
 		Scanner reader = new Scanner(System.in);
 
 		Session session = HibernateUtil.getSessionFactory().openSession();
-		session.beginTransaction();
 		ArrayList<Personajes> personajes = (ArrayList<Personajes>) session.createQuery("FROM Personajes").list();
 
 		int opcion = 0;
+		int id;
 
 		do {
-			System.out.println("\n\n1. Listado de personajes\n2. Modificar ataque personaje\n3. Borrar Personaje");
+			System.out.println(
+					"\n\n1. Listado de personajes\n2. Modificar ataque personaje\n3. Borrar Personaje\n4. Cambiar faccion de personaje\n5. Salir");
 			System.out.println("\nElige una opcion:");
 			opcion = reader.nextInt();
 			switch (opcion) {
 			case 1:
+				session.beginTransaction();
 				System.out.println("\n- Listado -");
 				try {
 					for (Personajes l : personajes) {
-						System.out.println("\n Nombre: " + l.getNombrePersonaje());
+						System.out.println("\n     ID: " + l.getPersonajeId());
+						System.out.println(" Nombre: " + l.getNombrePersonaje());
 						System.out.println(" Ataque: " + l.getAtaque());
 						System.out.println("Defensa: " + l.getDefensa());
 						System.out.println("Faccion: " + l.getFaccion().getNombreFaccion());
@@ -41,21 +44,31 @@ public class HibernateManager {
 				}
 				break;
 			case 2:
-
+				session.beginTransaction();
+				int ataque;
+				System.out.println("\nID del personaje a modificar:");
+				id = reader.nextInt();
+				System.out.println("Nuevo valor de ataque:");
+				ataque = reader.nextInt();
+				personajes.get(id - 1).setAtaque(ataque);
+				session.update(personajes.get(id - 1));
+				System.out.println("\nPersonaje id " + id + " modificado");
+				session.getTransaction().commit();
 				break;
 			case 3:
-
+				session.beginTransaction();
+				System.out.println("\nID del personaje a borrar:");
+				id = reader.nextInt();
+				session.remove(personajes.get(id - 1));
+				personajes.remove(id - 1);
+				System.out.println("\nPersonaje id " + id + " eliminado");
+				session.getTransaction().commit();
 				break;
 			case 4:
 
 				break;
+
 			case 5:
-
-				break;
-			case 6:
-
-				break;
-			case 7:
 				System.out.println("\nBye!");
 				break;
 
@@ -63,7 +76,7 @@ public class HibernateManager {
 				System.out.println("\nOpcion invalida");
 				break;
 			}
-		} while (opcion != 7);
+		} while (opcion != 5);
 
 		HibernateUtil.getSessionFactory().close();
 	}
