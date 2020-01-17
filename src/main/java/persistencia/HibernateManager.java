@@ -2,6 +2,9 @@ package persistencia;
 
 import java.util.*;
 
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -18,6 +21,7 @@ public class HibernateManager {
 
 		int opcion = 0;
 		int id;
+		int idF;
 
 		do {
 			System.out.println(
@@ -48,25 +52,52 @@ public class HibernateManager {
 				int ataque;
 				System.out.println("\nID del personaje a modificar:");
 				id = reader.nextInt();
-				System.out.println("Nuevo valor de ataque:");
-				ataque = reader.nextInt();
-				personajes.get(id - 1).setAtaque(ataque);
-				session.update(personajes.get(id - 1));
-				System.out.println("\nPersonaje id " + id + " modificado");
-				session.getTransaction().commit();
-				break;
+				if (id > personajes.size()) {
+					System.out.println("Personaje no existe");
+					break;
+				} else {
+					System.out.println("Nuevo valor de ataque:");
+					ataque = reader.nextInt();
+					personajes.get(id - 1).setAtaque(ataque);
+					session.update(personajes.get(id - 1));
+					System.out.println("\nPersonaje id " + id + " modificado");
+					session.getTransaction().commit();
+					break;
+				}
 			case 3:
 				session.beginTransaction();
 				System.out.println("\nID del personaje a borrar:");
 				id = reader.nextInt();
-				session.remove(personajes.get(id - 1));
-				personajes.remove(id - 1);
-				System.out.println("\nPersonaje id " + id + " eliminado");
-				session.getTransaction().commit();
-				break;
+				if (id > personajes.size()) {
+					System.out.println("Personaje no existe");
+					break;
+				} else {
+					session.remove(personajes.get(id - 1));
+					personajes.remove(id - 1);
+					System.out.println("\nPersonaje id " + id + " eliminado");
+					session.getTransaction().commit();
+					break;
+				}
 			case 4:
-
-				break;
+				session.beginTransaction();
+				System.out.println("\nID del personaje a modificar:");
+				id = reader.nextInt();
+				if (id > personajes.size()) {
+					System.out.println("Personaje no existe");
+					break;
+				} else {
+					System.out.println("\nID de la faccion:");
+					idF = reader.nextInt();
+					StoredProcedureQuery query = session.createStoredProcedureQuery("Change_Faction")
+							.registerStoredProcedureParameter("id_personaje", Integer.class, ParameterMode.IN)
+							.registerStoredProcedureParameter("id_faccion_destino", Integer.class, ParameterMode.IN)
+							.setParameter("id_personaje", id)
+							.setParameter("id_faccion_destino", idF);
+					query.execute();
+					session.getTransaction().commit();
+					System.out.println("\nPersonaje id " + id + " modificado");
+					break;
+				}
 
 			case 5:
 				System.out.println("\nBye!");
